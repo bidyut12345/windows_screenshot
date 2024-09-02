@@ -18,6 +18,7 @@ class WindowsScreenshot {
     if (!kIsWeb && Platform.isWindows) {
       await screenShot();
     } else {
+      if (!await screenCapturer.isAccessAllowed()) await screenCapturer.requestAccess();
       await screenCapturer.capture(mode: CaptureMode.screen);
     }
     await Future.delayed(const Duration(milliseconds: 10));
