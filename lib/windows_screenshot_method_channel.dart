@@ -16,8 +16,8 @@ class MethodChannelWindowsScreenshot extends WindowsScreenshotPlatform {
   }
 
   @override
-  Future<String?> screenShot() async {
-    final version = await methodChannel.invokeMethod<String>('screenshot');
+  Future<Uint8List?> screenShot() async {
+    final version = await methodChannel.invokeMethod<Uint8List>('screenshot');
     return version;
   }
 }

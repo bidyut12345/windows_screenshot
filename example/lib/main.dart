@@ -17,17 +17,25 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _windowsScreenshotPlugin = WindowsScreenshot();
+  String yymm = "";
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(Duration(milliseconds: 200), (timer) async {
-      try {
-        image = MemoryImage((await _windowsScreenshotPlugin.getscreenShot())!);
-      } catch (e) {
-        print(e);
+    Timer.run(() async {
+      while (true) {
+        try {
+          var tm = DateTime.now().millisecondsSinceEpoch;
+          var data = (await _windowsScreenshotPlugin.getscreenShot())!;
+          image = MemoryImage(data);
+          yymm = "${DateTime.now().millisecondsSinceEpoch - tm} : ${data.length / 1024}";
+          print(yymm);
+          setState(() {});
+        } catch (e) {
+          print(e);
+        }
+        await Future.delayed(Duration(milliseconds: 10));
       }
-      setState(() {});
     });
   }
 
@@ -36,15 +44,32 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              if (image != null) Image(image: image!),
-            ],
-          ),
+        // appBar: AppBar(
+        //   title: const Text('Plugin example app'),
+        // ),
+        body: Stack(
+          fit: StackFit.expand,
+          alignment: Alignment.centerRight,
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (image != null)
+                    Image(
+                      image: image!,
+                      gaplessPlayback: true,
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                yymm,
+                style: TextStyle(color: Colors.black, backgroundColor: Colors.yellow),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -10,18 +10,18 @@ class WindowsScreenshot {
     return WindowsScreenshotPlatform.instance.getPlatformVersion();
   }
 
-  Future<String?> screenShot() {
+  Future<Uint8List?> screenShot() {
     return WindowsScreenshotPlatform.instance.screenShot();
   }
 
   Future<Uint8List?> getscreenShot() async {
     if (!kIsWeb && Platform.isWindows) {
-      await screenShot();
+      return await screenShot();
     } else {
       if (!await screenCapturer.isAccessAllowed()) await screenCapturer.requestAccess();
       await screenCapturer.capture(mode: CaptureMode.screen);
+      await Future.delayed(const Duration(milliseconds: 10));
+      return await screenCapturer.readImageFromClipboard();
     }
-    await Future.delayed(const Duration(milliseconds: 10));
-    return await screenCapturer.readImageFromClipboard();
   }
 }

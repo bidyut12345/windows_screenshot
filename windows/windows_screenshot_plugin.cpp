@@ -41,6 +41,28 @@ namespace windows_screenshot
 
   WindowsScreenshotPlugin::~WindowsScreenshotPlugin() {}
 
+  std::vector<BYTE> Hbitmap2PNG(HBITMAP hbitmap)
+  {
+    std::vector<BYTE> buf;
+    if (hbitmap != NULL)
+    {
+      IStream *stream = NULL;
+      CreateStreamOnHGlobal(0, TRUE, &stream);
+      CImage image;
+      ULARGE_INTEGER liSize;
+
+      // screenshot to png and save to stream
+      image.Attach(hbitmap);
+      image.Save(stream, Gdiplus::ImageFormatJPEG); // ImageFormatPNG or ImageFormatJPEG
+      IStream_Size(stream, &liSize);
+      DWORD len = liSize.LowPart;
+      IStream_Reset(stream);
+      buf.resize(len);
+      IStream_Read(stream, &buf[0], len);
+      stream->Release();
+    }
+    return buf;
+  }
   void WindowsScreenshotPlugin::HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
@@ -83,45 +105,24 @@ namespace windows_screenshot
       BitBlt(hDC, 0, 0, w, h, hScreen, x1, y1, SRCCOPY);
 
       // save bitmap to clipboard
-      OpenClipboard(NULL);
-      EmptyClipboard();
-      SetClipboardData(CF_BITMAP, hBitmap);
-      CloseClipboard();
+      // OpenClipboard(NULL);
+      // EmptyClipboard();
+      // SetClipboardData(CF_BITMAP, hBitmap);
+      // CloseClipboard();
 
-      // std::vector<BYTE> pngBuf = Hbitmap2PNG(hBitmap);
-      // result->Success(flutter::EncodableValue(pngBuf));
       // clean up
+      std::vector<BYTE> pngBuf = Hbitmap2PNG(hBitmap);
       SelectObject(hDC, old_obj);
       DeleteDC(hDC);
       ReleaseDC(NULL, hScreen);
       DeleteObject(hBitmap);
-      result->Success(flutter::EncodableValue("DONE"));
+      // result->Success(flutter::EncodableValue("DONE"));
+      result->Success(flutter::EncodableValue(pngBuf));
+      pngBuf.clear();
     }
     else
     {
       result->NotImplemented();
     }
   }
-  // std::vector<BYTE> Hbitmap2PNG(HBITMAP hbitmap)
-  // {
-  //   std::vector<BYTE> buf;
-  //   if (hbitmap != NULL)
-  //   {
-  //     IStream *stream = NULL;
-  //     CreateStreamOnHGlobal(0, TRUE, &stream);
-  //     CImage image;
-  //     ULARGE_INTEGER liSize;
-
-  //     // screenshot to png and save to stream
-  //     image.Attach(hbitmap);
-  //     image.Save(stream, Gdiplus::ImageFormatPNG);
-  //     IStream_Size(stream, &liSize);
-  //     DWORD len = liSize.LowPart;
-  //     IStream_Reset(stream);
-  //     buf.resize(len);
-  //     IStream_Read(stream, &buf[0], len);
-  //     stream->Release();
-  //   }
-  //   return buf;
-  // }
 } // namespace windows_screenshot

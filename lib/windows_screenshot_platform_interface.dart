@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'windows_screenshot_method_channel.dart';
@@ -27,7 +28,7 @@ abstract class WindowsScreenshotPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<String?> screenShot() {
+  Future<Uint8List?> screenShot() {
     throw UnimplementedError('screenShot() has not been implemented.');
   }
 }
